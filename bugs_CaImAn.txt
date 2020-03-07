@@ -1,0 +1,5 @@
+our_pipeline (line 102) There are many NaN in rval_space! Maybe it is normal, not a problem.
+
+our_pipeline (line 115) There are many -Inf in fitness! Maybe it is normal, not a problem.
+
+update_temporal_components_fast (line 199:200 252:253) deconvolveCa need parameters 'window'?(deconvolveCa.m line 163 parseinputs, there is a default.)

@@ -1,0 +1,86 @@
+% run_CNMF_patches.m (line 105) parfor->for
+% determine_search_location.m (line 67) parfor->for
+% update_temporal_components.m (line 219) parfor->for
+
+If a patch is totally black, there will be an error, since A and C will be NaN.
+To fix that:
+% utilities\com.m (line 24:27)
+% update_temporal_components.m (line 166)
+our_pipeline.m (line 66:77)
+greedyROI.m (line 277) decomment
+initialize_components.m (line 138:144)
+CNMF.m (line 305:312)
+
+delete ds_data.mat(downsampled data) before start our_pipeline.m
+
+our_pipeline.m (line 90)
+add: 'MinPeakDist',5 ...
+(If 'MinPeakDist' is not smaller than 6, there will be an error.)
+
+2D->3D:
+gSig (@CNMF\CNMF.m line 173, add: obj.gSig = obj.options.gSig;)
+windowSiz (never used)
+block_size (deconvolution\oasis\deconvCa.m line275)(seems no need to change since we use only prod(block_size ).)
+medw (no need to change since medfilt2 operates on 2D images)(refer to utilities\threshold_components.m line 42)
+our_pipeline.m (line 98) Cn = correlation_image_max(data,8);->Cn = correlation_image_max(data,6); This line can be commented, since the code uses Cn has also been commented.
+comment our_pipeline.m line 132:138 since plot_contours is only adapted to 2D data.
+utilities\cnn_classifier.m (line 38) A_com = extract_patch(A,dims,[50,50]);->A_com = extract_patch(A,dims,[50,50,50]);
+utilities\extract_patch.m (line 83:87) A_com(:,:,i) = A_temp;->
+
+our_pipeline.m (line 19)
+tsub should make the number of frames of downsampled data greater than 8, or we can't estimate the noise standard deviation(update_temporal_components_fast (line 198)->GetSn).
+
+utilities\correlation_image_3D.m (line 85)
+add: sY(sY==0) = 1;
+to avoid the denominator being 0. Refer to line 86: Y = bsxfun(@times,Y,1./sY);
+
+% our_pipeline.m (line 108) 'cnn_model'->'cnn_model.h5' to avoid downloading the cnn model from internet. 
+% I have already downloaded and put it in the folder \CaImAn-MATLAB-master\cnn_model.h5. 
+% It can be downloaded here: https://www.dropbox.com/s/1csymylbne7yyt0/cnn_model.h5?dl=1
+% utilities\cnn_classifier.m (line 46) There will come up with an error:
+% importKerasNetwork requires the Neural Network Toolbox Importer for Keras Models support package. To install this support package, use the Add-On Explorer.
+% We just need to install this add-on. 
+comment our_pipeline.m (line 107:111), our_pipeline.m (line 120) delete ind_cnn, since the cnn model is pretrained for 2D images.
+
+our_pipeline.m (line 189) 'window',150->30 (this parameter may be unused)
+
+our_pipeline.m (line 198) plot
+
+‘cvx’: uses the CVX optimization toolbox available from http://www.cvxr.com/​(default). Please follow cvx installation instructions. cvx_setup.m must be run (only once) before running CNMF. (It seems that cvx is not used in run_pipeline.m, as well as our_pipeline.m)
+
+our_pipeline.m (line 173) F_full = C_full + R_full;(F_full need to be updated.)
+
+our_pipeline.m (line 51:57) Remove Ysub to same memory.
+
+run_CNMF_patches.m (line 108) Set K considering the size of the patch.
+
+YrA is already rescaled to the same unit of C. If we normalize C by nA, we can normalize YrA at the same time, with the same scale nA.
+
+update_temporal_components_fast.m (line 139) chunk_size->50, avoid loading too much data into memory simultaneously.
+
+Some important parameters:
+fr
+decay_time
+tsub
+patch_size (considering memory)
+overlap
+tau
+K (run_CNMF_patches.m (line 108))
+tau
+p
+merge_thr
+max_size_thr
+min_size_thr
+min_SNR
+spk_SNR
+
+Final results: 
+A_keep
+b
+F_full C_full R_full(F_full = C_full + R_full;)
+F_dff
+C_dec S_dec
+f_full
+
+
+

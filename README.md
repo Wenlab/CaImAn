@@ -1,136 +1,122 @@
-CaImAn
+[![Join the chat at https://gitter.im/epnev/ca_source_extraction](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/epnev/ca_source_extraction?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+CaImAn-MATLAB
 ======
-<img src="https://github.com/flatironinstitute/CaImAn/blob/master/docs/LOGOS/Caiman_logo_FI.png" width="500" align="right">
+<img src="https://github.com/simonsfoundation/CaImAn/blob/master/docs/LOGOS/Caiman_logo_FI.png" width="500" align="right">
+
+A Computational toolbox for large scale **Ca**lcium **Im**aging data **An**alysis.
+The code implements the CNMF algorithm [[1]](#neuron) for simultaneous source extraction and spike inference from large scale calcium imaging movies. Many more features are included (see below). The code is suitable for the analysis of somatic imaging data. Improved implementation for the analysis of dendritic/axonal imaging data will be added in the future. 
 
 
+## Features and methods included
 
-[![Join the chat at https://gitter.im/agiovann/SOURCE_EXTRACTION_PYTHON](https://badges.gitter.im/agiovann/SOURCE_EXTRACTION_PYTHON.svg)](https://gitter.im/agiovann/SOURCE_EXTRACTION_PYTHON?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+* **Source extraction** 
 
+    * Separates different sources based on constrained nonnegative matrix factorization (CNMF) [[1-2]](#neuron)
+    * Deals with heavily overlaping and neuropil contaminated movies     
+    * Selection of inferred sources using a [pre-trained convolutional neural network classifier](https://github.com/flatironinstitute/CaImAn-MATLAB/wiki/Component-classification-with-a-convolutional-neural-network)
+    * [Component registration across different sessions/days](https://github.com/flatironinstitute/CaImAn-MATLAB/wiki/Registering-ROIs-across-different-sessions-%5C--days) 
 
-A Python toolbox for large scale **Ca**lcium **Im**aging data **An**alysis and behavioral analysis.
+* **Denoising, deconvolution and spike extraction**
 
-CaImAn implements a set of essential methods required in the analysis pipeline of large scale calcium imaging data. Fast and scalable algorithms are implemented for motion correction, source extraction, spike deconvolution, and component registration across multiple days. It is suitable for both two-photon and one-photon fluorescence microscopy data, and can be run in both batch and online modes. CaImAn also contains some routines for the analysis of behavior from video cameras. A list of features as well as relevant references can be found [here](https://caiman.readthedocs.io/en/latest/CaImAn_features_and_references.html).
+    * Constrained foopsi method for inferring neural activity from fluorescence traces [[1]](#neuron)
+    * Near online implementation using the OASIS algorihtm [[3]](#oasis)
+    * MCMC algorithm for Bayesian spike inference [[4]](#mcmc)
+    
+* **Handling of very large datasets**
 
-## Web-based Docs
-Documentation for CaImAn (including install instructions) can be found online [here](https://caiman.readthedocs.io/en/master/Overview.html).
+    * [Memory mapping and parallel processing in patches](https://github.com/flatironinstitute/CaImAn-MATLAB/wiki/Processing-of-large-datasets)
+    
+* **Motion correction**
 
-## Companion paper and related references
-A paper explaining most of the implementation details and benchmarking can be found [here](https://elifesciences.org/articles/38173).
+    * Fast parallelizable non-rigid motion correction using the NoRMCorre algorithm [[5]](#normcorre). Separate standalone package can be found [here](https://github.com/simonsfoundation/NoRMCorre). It will be included in this package in the future.
+    
+New: Renaming to CaImAn-MATLAB
+======
+We moved the code into the Flatiron Institute github account and renamed the repository to CaImAn-MATLAB to bring it more in touch with the [CaImAn](https://github.com/simonsfoundation/CaImAn) Python package. Everything else is the same. The old link ```https://github.com/epnev/ca_source_extraction``` redirects here.
 
-```
-@article{giovannucci2019caiman,
-  title={CaImAn: An open source tool for scalable Calcium Imaging data Analysis},
-  author={Giovannucci, Andrea and Friedrich, Johannes and Gunn, Pat and Kalfon, Jeremie and Brown, Brandon L and Koay, Sue Ann and Taxidis, Jiannis and Najafi, Farzaneh and Gauthier, Jeffrey L and Zhou, Pengcheng and Khakh, Baljit S and Tank, David W and Chklovskii, Dmitri B and Pnevmatikakis, Eftychios A},
-  journal={eLife},
-  volume={8},
-  pages={e38173},
-  year={2019},
-  publisher={eLife Sciences Publications Limited}
-}
-```
+# Citation
 
-All the results and figures of the paper can be regenerated using this package. For more information visit this [page](https://github.com/flatironinstitute/CaImAn/tree/master/use_cases/eLife_scripts).
+If you use this code please cite the corresponding papers where original methods appeared (see References below), as well as: 
 
-CaImAn implements a variety of algorithms for analyzing calcium (and voltage) imaging data. A list of references that provide the theoretical background and original code for the included methods can be found [here](https://caiman.readthedocs.io/en/latest/CaImAn_features_and_references.html). 
- 
-If you use this code please cite the corresponding papers where original methods appeared as well the companion paper.
+<a name="caiman"></a>[1] Giovannucci A., Friedrich J., Gunn P., Kalfon J., Koay S.A., Taxidis J., Najafi F., Gauthier J.L., Zhou P., Tank D.W., Chklovskii D.B., Pnevmatikakis E.A. (2018). CaImAn: An open source tool for scalable Calcium Imaging data Analysis. bioarXiv preprint. [[paper]](https://doi.org/10.1101/339564)
 
-## New: Online analysis for microendoscopic 1p data (January 2020)
+# References
 
-We developed two approaches for analyzing streaming microendoscopic 1p data with hihg speed and low memory requirements. 
-The first approach (OnACID-E) features a direct implementation of the CNMF-E algorithm in an online setup. An example can be shown in the notebook `demos/notebooks/demo_online_CNMFE.ipynb`. The second approach first extracts the background by modeling it with a simple convolutional neural network (Ring-CNN) and proceeds with the analysis using the OnACID algorithm.
+The following references provide the theoretical background and original code for the included methods. 
 
-## New: Analysis pipeline for Voltage Imaging data (December 2019)
+### Deconvolution and demixing of calcium imaging data
 
-We recently added VolPy, an analysis pipeline for voltage imaging data. The analysis is based on following objects:
+<a name="neuron"></a>[1] Pnevmatikakis, E.A., Soudry, D., Gao, Y., Machado, T., Merel, J., ... & Paninski, L. (2016). Simultaneous denoising, deconvolution, and demixing of calcium imaging data. Neuron 89(2):285-299, [[paper]](http://dx.doi.org/10.1016/j.neuron.2015.11.037). 
 
-* `MotionCorrect`: An object for motion correction which can be used for both rigid and piece-wise rigid motion correction.
-* `volparams`: An object for setting parameters of voltage imaging. It can be set and changed easily and is passed into the algorithms.
-* `VOLPY`: An object for running the spike detection algorithm and saving results.
+<a name="struct"></a>[2] Pnevmatikakis, E.A., Gao, Y., Soudry, D., Pfau, D., Lacefield, C., ... & Paninski, L. (2014). A structured matrix factorization framework for large scale calcium imaging data analysis. arXiv preprint arXiv:1409.2903. [[paper]](http://arxiv.org/abs/1409.2903). 
 
-In order to use VolPy, you must install Keras into your conda environment. You can do this by activating your environment, and then issuing the command "conda install -c conda-forge keras".
+<a name="oasis"></a>[3] Friedrich J. and Paninski L. Fast active set methods for online spike inference from calcium imaging. NIPS, 29:1984-1992, 2016. [[paper]](https://papers.nips.cc/paper/6505-fast-active-set-methods-for-online-spike-inference-from-calcium-imaging), [[Github repository - Python]](https://github.com/j-friedrich/OASIS), [[Github repository - MATLAB]](https://github.com/zhoupc/OASIS_matlab).
 
-To see examples of how these methods are used, please consult the `demo_pipeline_voltage_imaging.py` script in the `demos/general` folder. For more information about the approach check the [preprint](https://www.biorxiv.org/content/10.1101/2020.01.02.892323v1).
+<a name="mcmc"></a>[4] Pnevmatikakis, E. A., Merel, J., Pakman, A., & Paninski, L. Bayesian spike inference from calcium imaging data. In Signals, Systems and Computers, 2013 Asilomar Conference on (pp. 349-353). IEEE, 2013. [[paper]](https://arxiv.org/abs/1311.6864), [[Github repository - MATLAB]](https://github.com/epnev/continuous_time_ca_sampler).
 
-## New: Installation through conda-forge (August 2019)
+### Motion Correction
 
-Beginning in August 2019 we have an experimental binary release of the software in the conda-forge package repos. This is intended for people who can use CaImAn as a library, interacting with it as the demos do. It also does not need a compiler. It is not suitable for people intending to change the CaImAn codebase. Comfort with conda is still required. If you wish to use the binary package, you do not need the sources (including this repo) at all. Installation and updating instructions can be found [here](./docs/source/Installation.rst).
+<a name="normcorre"></a>[5] Pnevmatikakis, E.A., and Giovannucci A. (2017). NoRMCorre: An online algorithm for piecewise rigid motion correction of calcium imaging data. Journal of Neuroscience Methods, 291:83-92 [[paper]](https://doi.org/10.1016/j.jneumeth.2017.07.031), [[Github repository - MATLAB]](https://github.com/simonsfoundation/normcorre).
 
-You will still need to use caimanmanager.py afterwards to create a data directory. If you install this way, do not follow any of the other install instructions below.
+Code description
+=======
 
-## Documentation & Wiki
+The best way to start is by looking at the various demos.
+- [demo_script.m](https://github.com/epnev/ca_source_extraction/blob/master/demo_script.m): A simple demo with a small dataset included in the repo to display the notation and basic operations
+- [demo_script_class.m](https://github.com/flatironinstitute/CaImAn-MATLAB/blob/master/demo_script_class.m): Replicates the [demo_script.m](https://github.com/epnev/ca_source_extraction/blob/master/demo_script.m) file in a cleaner way using a CNMF object.
+- [demo_patches.m](https://github.com/epnev/ca_source_extraction/blob/master/demo_patches.m): A larger demo displaying the process of memory mapping and spliting the field of view in patches to be processed in parallel and then combined.
+- [demo_patches_class.m](https://github.com/epnev/ca_source_extraction/blob/master/demo_patches_class.m): Similar to [demo_patches.m](https://github.com/epnev/ca_source_extraction/blob/master/demo_patches.m) but using the CNMF object.
+- [run_pipeline.m](https://github.com/epnev/ca_source_extraction/blob/master/run_pipeline.m): Demo for the complete pipeline of motion correction, source separation and spike extraction for large datasets. More details about the pipeline can be found [here](https://github.com/epnev/ca_source_extraction/wiki/Complete-analysis-pipeline).
+- [3D/demo_3D.m](https://github.com/epnev/ca_source_extraction/blob/master/3D/demo_3D.m): Demo for processing of 3D volumetric imaging data.
 
-Documentation of the code can be found [here](https://caiman.readthedocs.io/en/master/). 
+# Python
 
-### Installation for behavioral analysis
-* Installation on Linux (Windows and MacOS are problematic with anaconda at the moment)
-   * create a new environment (suggested for safety) and follow the instructions for the calcium imaging installation
-   * Install spams, as explained [here](http://spams-devel.gforge.inria.fr/). Installation is not straightforward and it might take some trials to get it right.
+A complete analysis Python pipeline including motion correction, source extraction and activity deconvolution is performed through the package [CaImAn](https://github.com/simonsfoundation/caiman). This package also includes method for online processing of calcium imaging data and elements of behavioral analysis in head fixed mice. 
 
-## Demos
+Usage and Documentation
+=======
+Check the demo scripts and the [wiki](https://github.com/epnev/ca_source_extraction/wiki) to get started.
 
-* Notebooks: The notebooks provide a simple and friendly way to get into CaImAn and understand its main characteristics. 
-They are located in the `demos/notebooks`. To launch one of the jupyter notebooks:
-        
-	```bash
-        source activate CaImAn
-        jupyter notebook --NotebookApp.iopub_data_rate_limit=1.0e10
-	```
-	and select the notebook from within Jupyter's browser. The argument `--NotebookApp.iopub_data_rate_limit=1.0e10` will prevent any memory issues while plotting on a notebook.
-   
-* demo files are also found in the demos/general subfolder. We suggest trying demo_pipeline.py first as it contains most of the tasks required by calcium imaging. For behavior use demo_behavior.py
+Dependencies
+========
+The following matlab toolboxes are needed for the default parameter settings:
 
-* If you modify the demos to use them for your own data it is recommended that you save them in a different file to avoid file conflicts during updating.
+- Statistics and Machine Learning Toolbox
+- Image processing toolbox
 
-* If you want to directly launch the python files, your python console still must be in the CaImAn directory. 
+Depending on the settings the following toolboxes may also be required
 
-## Testing
+- Neural networks toolbox (required for component classifier)
+- Signal processing toolbox (recommended but not required)
+- Parallel computing toolbox (recommended for large datasets but not required)
+- Optimization toolbox (not required)
 
-* All diffs must be tested before asking for a pull request. Call ```python caimanmanager.py test``` from outside of your CaImAn folder to look for errors (you need to pass the path to the caimanmanager.py file). 
-     
-# Main developers:
+Depending on the settings the following packages may also be required
 
-* Eftychios A. Pnevmatikakis, **Flatiron Institute, Simons Foundation** 
-* Andrea Giovannucci, **University of North Carolina, Chapel Hill**
-* Johannes Friedrich, **Flatiron Institute, Simons Foundation**
-* Pat Gunn, **Flatiron Institute, Simons Foundation**
+- The CVX library which can be downloaded from http://cvxr.com/cvx/download/ (after unpacking CVX open Matlab and run cvx_setup from inside the CVX directory to properly install and add CVX to the Matlab path). **CVX is no longer required**.
+- SPGL1 package from https://github.com/mpf/spgl1 (for solving constrained_foopsi using SPGL1)
 
-A complete list of contributors can be found [here](https://github.com/flatironinstitute/CaImAn/graphs/contributors).
+# Developers
 
+This package is mainly developed and maintained by [Eftychios A. Pnevmatikakis](https://github.com/epnev) (Flatiron Institute, Simons Foundation) with help from a lot of [contributors](https://github.com/flatironinstitute/CaImAn-MATLAB/graphs/contributors).
 
-## Other docs in this repo
-* [Running CaImAn on a Cluster](docs/CLUSTER.md)
-* [Install quirks on some Linux Distributions](docs/README-Distros.md)
-* [How CaImAn can use your GPUs](docs/README-GPU.md)
-
-## Related packages
-
-The implementation of this package is developed in parallel with a MATLAB toobox, which can be found [here](https://github.com/epnev/ca_source_extraction). 
-
-Some tools that are currently available in Matlab but have not been ported to CaImAn are
-
-- [MCMC spike inference](https://github.com/epnev/continuous_time_ca_sampler) 
-
-## Dependencies
-
-A list of dependencies can be found in the [environment file](https://github.com/flatironinstitute/CaImAn/blob/master/environment.yml).
-
-
-## Questions, comments, issues
-
-Please use the [gitter chat room](https://gitter.im/agiovann/Constrained_NMF) for questions and comments and create an issue for any bugs you might encounter.
-
-## Acknowledgements
+# Acknowledgements
 
 Special thanks to the following people for letting us use their datasets for our various demo files:
 
 * Weijian Yang, Darcy Peterka, Rafael Yuste, Columbia University
 * Sue Ann Koay, David Tank, Princeton University
-* Manolis Froudarakis, Jake Reimers, Andreas Tolias, Baylor College of Medicine
-* Clay Lacefield, Randy Bruno, Columbia University
-* Daniel Aharoni, Peyman Golshani, UCLA
+* Diego Pacheco Pinedo, Mala Murthy, Princeton University
+* Clay Lacefied, Randy Bruno, Columbia University
 
-## License
+
+Questions, comments, issues
+=======
+Please use the gitter chat room (use the button above) for questions and comments and create an issue for any bugs you might encounter.
+
+License
+=======
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
